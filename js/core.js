@@ -109,3 +109,59 @@ const observer = new IntersectionObserver((entries, observer) => {
 }, { threshold: 0.2 });
 
 reveals.forEach(el => observer.observe(el));
+
+
+
+
+
+
+
+
+
+
+const carousel = document.querySelector('.carousel-photo');
+let offset = 0;
+let speed = 1; // px за кадр
+let isDown = false;
+let startX;
+let startOffset;
+
+// ширина половини (бо дубль)
+const halfWidth = carousel.scrollWidth / 2;
+
+function animate() {
+  if (!isDown) {
+    offset -= speed;
+    if (Math.abs(offset) >= halfWidth) {
+      offset = 0; // м’яко переносимо на початок
+    }
+    carousel.style.transform = `translateX(${offset}px)`;
+  }
+  requestAnimationFrame(animate);
+}
+animate();
+
+// drag мишкою
+carousel.addEventListener('mousedown', (e) => {
+  isDown = true;
+  startX = e.pageX;
+  startOffset = offset;
+  carousel.style.cursor = 'grabbing';
+});
+
+document.addEventListener('mouseup', () => {
+  if (isDown) {
+    isDown = false;
+    carousel.style.cursor = 'grab';
+  }
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isDown) return;
+  const x = e.pageX - startX;
+  offset = startOffset + x;
+  // теж переносимо без ривка
+  if (offset <= -halfWidth) offset = 0;
+  if (offset > 0) offset = -halfWidth;
+  carousel.style.transform = `translateX(${offset}px)`;
+});
