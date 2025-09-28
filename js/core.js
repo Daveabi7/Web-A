@@ -1,72 +1,58 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // FAQ аккордеон
-  const toggles = document.querySelectorAll('.vacancy-toggle');
-  toggles.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const item = btn.parentElement;
-      const isActive = item.classList.toggle('active');
-      const symbol = btn.querySelector('.symbol');
+/* =========================
+   SLIDERS
+   ========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  const carousel = document.getElementById("carousel");
+  let items, itemWidth, totalWidth, halfWidth, buffer;
+  let offset = 0;
+  let speed = 0.5;
 
-      toggles.forEach(otherBtn => {
-        const otherItem = otherBtn.parentElement;
-        if (otherItem !== item) {
-          otherItem.classList.remove('active');
-          otherBtn.querySelector('.symbol').textContent = '+';
-        }
-      });
+  function recalc() {
+    items = carousel.querySelectorAll(".item-photo");
+    if (items.length === 0) return;
 
-      symbol.textContent = isActive ? '−' : '+';
-    });
-  });
+    itemWidth = items[0].offsetWidth + parseInt(getComputedStyle(items[0]).marginRight);
 
-  // Горизонтальний скрол
-  const mediaCarousel = document.querySelector('.media-carousel');
-  if (mediaCarousel) {
-    mediaCarousel.addEventListener('wheel', e => {
-      e.preventDefault();
-      mediaCarousel.scrollLeft += e.deltaY;
-    });
+    totalWidth = Array.from(items).reduce((acc, el) => acc + el.offsetWidth + parseInt(getComputedStyle(el).marginRight), 0);
+
+    const screenWidth = window.innerWidth;
+    const minWidth = screenWidth * 3;
+
+    while (carousel.scrollWidth < minWidth) {
+      items.forEach(el => carousel.appendChild(el.cloneNode(true)));
+    }
+
+    halfWidth = carousel.scrollWidth / 2;
+    buffer = itemWidth;
   }
 
-  // Swiper: знищена техніка
-  new Swiper('.destroyed-tech .swiper-container', {
-    loop: true,
-    autoplay: {
-      delay: 3000,
-      disableOnInteraction: false,
-    },
-    navigation: {
-      nextEl: '.destroyed-tech .swiper-button-next',
-      prevEl: '.destroyed-tech .swiper-button-prev',
-    },
-    pagination: {
-      el: '.destroyed-tech .swiper-pagination',
-      clickable: true,
-    },
-  });
+  function animate() {
+    offset -= speed;
 
-  // Swiper: командир
-  new Swiper('.commander-slider .swiper-container', {
-    loop: true,
-    autoplay: {
-      delay: 3000,
-      disableOnInteraction: false,
-    },
-    navigation: {
-      nextEl: '.commander-slider .swiper-button-next',
-      prevEl: '.commander-slider .swiper-button-prev',
-    },
-    pagination: {
-      el: '.commander-slider .swiper-pagination',
-      clickable: true,
-    },
+    if (offset <= -halfWidth - buffer) {
+      offset += halfWidth;
+    }
+    if (offset > buffer) {
+      offset -= halfWidth;
+    }
+
+    carousel.style.transform = `translateX(${offset}px)`;
+    requestAnimationFrame(animate);
+  }
+
+  recalc();
+  animate();
+
+  window.addEventListener("resize", () => {
+    offset = 0;
+    recalc();
   });
 });
 
-(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97968aec6b389f3e',t:'MTc1NjkxNjA5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
 
-
-// Popup scroll trigger
+/* =========================
+   POPUP
+   ========================= */
 const popup = document.getElementById('popup');
 const closePopup = document.querySelector('.popup-close');
 let popupShown = false;
@@ -77,7 +63,7 @@ window.addEventListener('scroll', () => {
   const docHeight = document.body.scrollHeight - window.innerHeight;
   const scrollPercent = scrollTop / docHeight;
 
-  if (scrollPercent > 0.85) { // показати коли дійшли майже до кінця
+  if (scrollPercent > 0.85) {
     popup.style.display = 'flex';
     popupShown = true;
   }
@@ -96,72 +82,51 @@ window.addEventListener('click', (e) => {
 });
 
 
-// Анімація при скролі (reveal)
-const reveals = document.querySelectorAll('.reveal');
 
-const observer = new IntersectionObserver((entries, observer) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('active');
-      observer.unobserve(entry.target); // анімація запускається тільки 1 раз
-    }
+/* =========================
+   ACCORDION
+   ========================= */
+const filterBtns = document.querySelectorAll('.filter-btns .btn');
+  const categories = document.querySelectorAll('.category');
+  const toggleBtn = document.getElementById('toggleMore');
+
+  let showAll = false;
+
+  function applyFilter(filter) {
+    categories.forEach((cat, index) => {
+      if (filter === 'all') {
+        if (!showAll && index >= 3) {
+          cat.style.display = 'none';
+        } else {
+          cat.style.display = 'block';
+        }
+      } else {
+        if (cat.classList.contains(filter)) {
+          cat.style.display = 'block';
+        } else {
+          cat.style.display = 'none';
+        }
+      }
+    });
+
+    toggleBtn.style.display = (filter === 'all') ? 'block' : 'none';
+    toggleBtn.textContent = showAll ? 'Звернути' : 'Більше вакансій';
+  }
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.getAttribute('data-filter');
+      showAll = false;
+      applyFilter(filter);
+    });
   });
-}, { threshold: 0.2 });
 
-reveals.forEach(el => observer.observe(el));
+  toggleBtn.addEventListener('click', () => {
+    showAll = !showAll;
+    applyFilter('all');
+  });
 
-
-
-
-
-
-
-
-
-
-const carousel = document.querySelector('.carousel-photo');
-let offset = 0;
-let speed = 1; // px за кадр
-let isDown = false;
-let startX;
-let startOffset;
-
-// ширина половини (бо дубль)
-const halfWidth = carousel.scrollWidth / 2;
-
-function animate() {
-  if (!isDown) {
-    offset -= speed;
-    if (Math.abs(offset) >= halfWidth) {
-      offset = 0; // м’яко переносимо на початок
-    }
-    carousel.style.transform = `translateX(${offset}px)`;
-  }
-  requestAnimationFrame(animate);
-}
-animate();
-
-// drag мишкою
-carousel.addEventListener('mousedown', (e) => {
-  isDown = true;
-  startX = e.pageX;
-  startOffset = offset;
-  carousel.style.cursor = 'grabbing';
-});
-
-document.addEventListener('mouseup', () => {
-  if (isDown) {
-    isDown = false;
-    carousel.style.cursor = 'grab';
-  }
-});
-
-document.addEventListener('mousemove', (e) => {
-  if (!isDown) return;
-  const x = e.pageX - startX;
-  offset = startOffset + x;
-  // теж переносимо без ривка
-  if (offset <= -halfWidth) offset = 0;
-  if (offset > 0) offset = -halfWidth;
-  carousel.style.transform = `translateX(${offset}px)`;
-});
+  applyFilter('all');
+  
