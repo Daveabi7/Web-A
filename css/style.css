@@ -269,8 +269,27 @@ footer a {
 
 @media (max-width: 576px) {
   .text-one {
-    font-size: 32px;
-    line-height: 38px;
+    font-size: 42px;
+    line-height: 43px;
+  }
+}
+
+.text-2014{
+  font-size: 50px; 
+  -webkit-text-stroke: 3px;
+}
+
+@media (max-width: 992px) {
+  .text-2014 {
+    font-size: 40px;
+    line-height: 56px;
+  }
+}
+
+@media (max-width: 576px) {
+  .text-2014 {
+    font-size: 30px;
+    line-height: 43px;
   }
 }
 
@@ -336,6 +355,24 @@ footer a {
 @media (max-width: 576px) {
   .text-video {
     font-size: 32px;
+    line-height: 38px;
+  }
+}
+
+.text-popup{
+  letter-spacing: 4px;
+}
+
+@media (max-width: 992px) {
+  .text-popup {
+    font-size: 10px;
+    line-height: 56px;
+  }
+}
+
+@media (max-width: 576px) {
+  .text-popup {
+    font-size: 5px;
     line-height: 38px;
   }
 }
